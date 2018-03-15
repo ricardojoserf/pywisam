@@ -35,5 +35,5 @@ conf_file="supp.conf"
 
 os.system( "wpa_passphrase "+essid+" "+password+" > " + conf_file)
 os.system("wpa_supplicant -Dnl80211 -i "+interfaz+" -c "+conf_file+" &")
-os.system("rm "+conf_file)
+#os.system("rm "+conf_file)
 
