@@ -1,8 +1,8 @@
 from wifi import Cell, Scheme
 import os
 
-interfaz = 'wlxc04a00118487'
-#interfaz = raw_input('Network interface: ')
+#interfaz = 'wlxc04a00118487'
+interfaz = raw_input('Network interface: ')
 list_ = []
 redes = []
 
@@ -29,21 +29,11 @@ for red in redes:
 
 id_red = raw_input('Select id: ')
 password = raw_input('Password: ')
-#cell = list_[int(id_red)]
-#scheme = Scheme.for_cell(interfaz, 'home', cell, password)
-#scheme.delete()
-#scheme.save()
-#scheme.activate()
 
 essid=redes[int(id_red)][0]
 conf_file="supp.conf"
-#command = "echo 'ctrl_interface=/var/run/wpa_supplicant \nnetwork={\n   ssid=\""+essid+"\"\n   scan_ssid=1\n   proto=WPA\n   key_mgmt=WPA-PSK\n   psk=\""+password+"\"\n}' > "+conf_file
-#os.system(command)
 
-os.system( "(wpa_passphrase W4nd4Wifi wandafortea1212) >> " + conf_file)
-
-#os.system("wpa_supplicant -B -w -c "+conf_file+" -D wext -i "+interfaz)
-os.system("wpa_supplicant -Dnl80211 -i "+interfaz+" -c "+conf_file)
-
-#os.system("rm "+conf_file)
+os.system( "wpa_passphrase "+essid+" "+password+" > " + conf_file)
+os.system("wpa_supplicant -Dnl80211 -i "+interfaz+" -c "+conf_file+" &")
+os.system("rm "+conf_file)
 
