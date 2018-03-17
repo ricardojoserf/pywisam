@@ -29,6 +29,7 @@ def menu():
 	else:
 		print "Unknown option"
 
+
 def create_ap():
 	ap_type=raw_input("Options: \n1: Open \n2: WPE \n3: WPA2\n")
 	if ap_type == "1":
@@ -39,7 +40,6 @@ def create_ap():
 		time.sleep(1)
 		print "Deploying AP..."
 		os.system("sudo hostapd temp/open.conf")
-
 	if ap_type == "2":
 		essid=raw_input("Network name:")
 		passphrase = raw_input("Passphrase:")
@@ -52,6 +52,19 @@ def create_ap():
 		time.sleep(1)
 		print "Deploying AP..."
 		os.system("sudo hostapd temp/wep.conf")
+	if ap_type == "3":
+		essid=raw_input("Network name:")
+		passphrase = raw_input("Passphrase:")
+		while len(passphrase)<8:
+			print "Incorrect length (8 or more characters)"
+			passphrase = raw_input("Passphrase:")
+		channel=raw_input("Channel:")
+		print "Creating conf file in temp/"
+		os.system("echo 'interface="+interfaz+"\nssid="+essid+"\nchannel="+channel+"\nwpa_passphrase="+passphrase+"\nhw_mode=g\nieee80211n=1\nwmm_enabled=1\nauth_algs=1\nwpa=2 \nwpa_key_mgmt=WPA-PSK \nrsn_pairwise=CCMP' > temp/wpa.conf")
+		time.sleep(1)
+		print "Deploying AP..."
+		os.system("sudo hostapd temp/wpa.conf")
+
 
 def deauth_client():
 	ap_mac = raw_input("AP MAC:")
@@ -88,18 +101,15 @@ def connect():
 		os.system( "wpa_passphrase "+essid+" "+password+" > " + conf_file)
 		os.system("wpa_supplicant -Dnl80211 -i "+interfaz+" -c "+conf_file+" &")
 		sys.exit()
-		#os.system("rm "+conf_file)
 
 	is_enterprise = raw_input("Is WPA-Enterprise? (y/N)")
 	if is_enterprise == "y":
-		#os.system( "wpa_passphrase "+essid+" "+password+" > " + conf_file)
 		identity = raw_input('Identity: ')
 		password = raw_input('Password: ')
 		is_mschapv2 = raw_input("Use PEAP+MSCHAPv2? (y/N)")
 		if is_mschapv2 == "y":
 			os.system("echo 'ctrl_interface=DIR=/var/run/wpa_supplicant \nnetwork={ \nssid=\""+essid+"\"\nscan_ssid=1 \nkey_mgmt=WPA-EAP \neap=PEAP \nidentity=\""+identity+"\"\npassword=\""+password+"\" \nphase1=\"peaplabel=0\" \nphase2=\"auth=MSCHAPV2\" \n}' > "+conf_file)
 			os.system("wpa_supplicant -Dnl80211 -i "+interfaz+" -c "+conf_file+" &")
-			#os.system("rm "+conf_file)
 
 
 def scan():
