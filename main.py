@@ -33,7 +33,7 @@ def menu():
 
 
 def create_ap():
-	ap_type=raw_input("Options: \n1: Open \n2: WPE \n3: WPA2\n")
+	ap_type=raw_input("Options: \n1: Open \n2: WPE \n3: WPA2\n4: WPA-Enterprise (AP+Radius Server) \n")
 	if ap_type == "1":
 		essid=raw_input("Network name:")
 		channel=raw_input("Channel:")
@@ -42,7 +42,7 @@ def create_ap():
 		time.sleep(1)
 		print "Deploying AP..."
 		os.system("sudo hostapd temp/open.conf")
-	if ap_type == "2":
+	elif ap_type == "2":
 		essid=raw_input("Network name:")
 		passphrase = raw_input("Passphrase:")
 		while ( len(passphrase)!=5 and len(passphrase)!=13 and len(passphrase)!=16 and len(passphrase)!=29):
@@ -54,7 +54,7 @@ def create_ap():
 		time.sleep(1)
 		print "Deploying AP..."
 		os.system("sudo hostapd temp/wep.conf")
-	if ap_type == "3":
+	elif ap_type == "3":
 		essid=raw_input("Network name:")
 		passphrase = raw_input("Passphrase:")
 		while len(passphrase)<8:
@@ -66,6 +66,15 @@ def create_ap():
 		time.sleep(1)
 		print "Deploying AP..."
 		os.system("sudo hostapd temp/wpa.conf")
+	elif ap_type == "4":
+		essid=raw_input("Network name:")
+		channel=raw_input("Channel:")
+		print "Creating conf file in temp/"
+		os.system("echo 'interface="+interfaz+"\neap_user_file=hostapd-wpe.eap_user\nca_cert=certs/ca.pem\nserver_cert=certs/server.pem\nprivate_key=certs/server.pem\nprivate_key_passwd=whatever\ndh_file=certs/dh\nssid="+essid+"\nhw_mode=g\nchannel="+channel+"\neap_server=1\neap_fast_a_id=101112131415161718191a1b1c1d1e1f\neap_fast_a_id_info=hostapd-wpe\neap_fast_prov=3\nieee8021x=1\npac_key_lifetime=604800\npac_key_refresh_time=86400\npac_opaque_encr_key=000102030405060708090a0b0c0d0e0f\nwpa=1\nwpa_key_mgmt=WPA-EAP\nwpa_pairwise=TKIP CCMP\nlogger_syslog=-1\nlogger_syslog_level=2\nlogger_stdout=-1\nlogger_stdout_level=2\nctrl_interface=/var/run/hostapd\nctrl_interface_group=0\nbeacon_int=100\ndtim_period=2\nmax_num_sta=255\nrts_threshold=2347\nfragm_threshold=2346\nmacaddr_acl=0\nauth_algs=3\nignore_broadcast_ssid=0\nwmm_enabled=1\nwmm_ac_bk_cwmin=4\nwmm_ac_bk_cwmax=10\nwmm_ac_bk_aifs=7\nwmm_ac_bk_txop_limit=0\nwmm_ac_bk_acm=0\nwmm_ac_be_aifs=3\nwmm_ac_be_cwmin=4\nwmm_ac_be_cwmax=10\nwmm_ac_be_txop_limit=0\nwmm_ac_be_acm=0\nwmm_ac_vi_aifs=2\nwmm_ac_vi_cwmin=3\nwmm_ac_vi_cwmax=4\nwmm_ac_vi_txop_limit=94\nwmm_ac_vi_acm=0\nwmm_ac_vo_aifs=2\nwmm_ac_vo_cwmin=2\nwmm_ac_vo_cwmax=3\nwmm_ac_vo_txop_limit=47\nwmm_ac_vo_acm=0\neapol_key_index_workaround=0\nown_ip_addr=127.0.0.1' > temp/enterprise.conf")
+		time.sleep(1)
+		print "Deploying AP..."
+		os.system("sudo airmon-ng check kill")
+		os.system("cd hostapd-wpe && sudo hostapd-wpe ../temp/enterprise.conf")
 
 
 def deauth_client():
