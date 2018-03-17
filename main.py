@@ -129,14 +129,12 @@ def connect():
 	id_red = raw_input('Select id: ')
 	essid=redes[int(id_red)].get("ssid")
 	conf_file="temp/supp.conf"
-
 	is_psk = raw_input("Is WPA-PSK? (y/N)")
 	if is_psk == "y":
 		password = raw_input('Password: ')
 		os.system( "wpa_passphrase "+essid+" "+password+" > " + conf_file)
 		os.system("wpa_supplicant -Dnl80211 -i "+interfaz+" -c "+conf_file+" &")
 		sys.exit()
-
 	is_enterprise = raw_input("Is WPA-Enterprise? (y/N)")
 	if is_enterprise == "y":
 		identity = raw_input('Identity: ')
