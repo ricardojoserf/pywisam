@@ -1,16 +1,17 @@
 import os
 import sys
+import time
 from wifi import Cell, Scheme
 
-#interfaz = 'wlxc04a00118487'
-interfaz = raw_input('Network interface: ')
+interfaz = 'wlxc04a00118487'
+#interfaz = raw_input('Network interface: ')
 os.system("sudo ifconfig "+interfaz+" down")
 os.system("sudo ifconfig "+interfaz+" up")
 redes = []
 
 
 def menu():
-	opt_ = raw_input('Options: \n1: Scan \n2: Connect \n3: Capture traffic\n4: Crack WPA/WPA2 traffic file \n')
+	opt_ = raw_input('\nOptions: \n1: Scan \n2: Connect \n3: Capture traffic\n4: Crack WPA/WPA2 traffic file \n5: Deauth AP \n6: Deauth specific client \n7: Create AP\n')
 	if opt_ == "1":
 		scan()
 	elif opt_=="2":
@@ -23,9 +24,34 @@ def menu():
 		deauth_ap()
 	elif opt_=="6":
 		deauth_client()
+	elif opt_=="7":
+		create_ap()
 	else:
 		print "Unknown option"
 
+def create_ap():
+	ap_type=raw_input("Options: \n1: Open \n2: WPE \n3: WPA2\n")
+	if ap_type == "1":
+		essid=raw_input("Network name:")
+		channel=raw_input("Channel:")
+		print "Creating conf file in temp/"
+		os.system("echo 'interface="+interfaz+"\ndriver=nl80211\nssid="+essid+"\nhw_mode=g\nchannel="+channel+"\nauth_algs=1\nignore_broadcast_ssid=0\nwpa=0\nmacaddr_acl=1' > temp/open.conf")
+		time.sleep(1)
+		print "Deploying AP..."
+		os.system("sudo hostapd temp/open.conf")
+
+	if ap_type == "2":
+		essid=raw_input("Network name:")
+		passphrase = raw_input("Passphrase:")
+		while ( len(passphrase)!=5 and len(passphrase)!=13 and len(passphrase)!=16 and len(passphrase)!=29):
+			print "Incorrect length (5,13,16 or 29 characters)"
+			passphrase = raw_input("Passphrase:")
+		channel=raw_input("Channel:")
+		print "Creating conf file in temp/"
+		os.system("echo 'interface="+interfaz+"\ndriver=nl80211\nssid="+essid+"\nhw_mode=g\nchannel="+channel+"\nmacaddr_acl=0\nauth_algs=3\nignore_broadcast_ssid=0\nwep_default_key=1\nwep_key1=\""+passphrase+"\"\nwep_key_len_broadcast=\"5\"\nwep_key_len_unicast=\"5\"\nwep_rekey_period=300' > temp/wep.conf")
+		time.sleep(1)
+		print "Deploying AP..."
+		os.system("sudo hostapd temp/wep.conf")
 
 def deauth_client():
 	ap_mac = raw_input("AP MAC:")
