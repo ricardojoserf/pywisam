@@ -6,18 +6,20 @@ import time
 from wifi import Cell, Scheme
 '''
 interfaz = 'wlxc04a00118487'
-'''
 interfaz = raw_input('Network interface: ')
+'''
+interfaz = 'ra0'
 #os.system("sudo ifconfig "+interfaz+" down")
 #os.system("sudo iwconfig "+interfaz+" mode managed")
-#os.system("sudo ifconfig "+interfaz+" up")
+os.system("sudo ifconfig "+interfaz+" up")
 redes = []
 
 
 def menu():
-	opt_ = raw_input('\nOptions: \n1: Scan \n2: Connect (working on it)\n3: Capture traffic \n4: Crack handshake from pcap\n5: Deauth attack \n6: Create AP\n')
+	opt_ = raw_input('\nOptions: \n1: Scan \n2: Connect\n3: Capture traffic \n4: Crack handshake from pcap\n5: Deauth attack \n6: Create AP\n')
 	if   opt_ == "1":
 		scan()
+		menu()
 	elif opt_=="2":
 		connect()
 	elif opt_=="3":
@@ -81,6 +83,7 @@ def create_ap():
 
 
 def deauth_client():
+	scan()
 	id_red = raw_input('Select id: ')
 	red=redes[int(id_red)]
 	ap_mac=red.get("mac")
@@ -95,6 +98,7 @@ def deauth_client():
 
 
 def deauth_ap():
+	scan()
 	id_red = raw_input('Select id: ')
 	red=redes[int(id_red)]
 	ap_mac=red.get("mac")
@@ -128,12 +132,14 @@ def capture_traffic():
 	os.system("sudo airodump-ng -w "+pcap_name+" --output-format "+output_format+" "+interfaz)
 
 def connect():
+	scan()
+	if not os.path.isdir("temp"):
+		os.system("mkdir temp")
 	id_red = raw_input('Select id: ')
 	red = redes[int(id_red)]
 	essid = red.get("ssid")
 	conf_file = "temp/last_connection.conf"
-	cifrado = red.get("cifrado").lowercase
-	print "Connecting a network with %s encryption" % (cifrado)
+	cifrado = red.get("cifrado").lower()
 	if cifrado == "none":
 		os.system("echo 'network={\nssid=\""+essid+"\"\nkey_mgmt=NONE\npriority=100\n}' > conf_file")
 	elif cifrado == "wep":
@@ -141,22 +147,18 @@ def connect():
 		while ( len(passphrase)!=5 and len(passphrase)!=13 and len(passphrase)!=16 and len(passphrase)!=29):
 			print "Incorrect length (5,13,16 or 29 characters)"
 			passphrase = raw_input("Passphrase:")
-		os.system("echo 'network={\nssid=\""+essid+"\"\nkey_mgmt=NONE\nwep_key0=\""+password+"\"\nwep_tx_keyidx=0}' > conf_file")
+		os.system("echo 'network={\nssid=\""+essid+"\"\nkey_mgmt=NONE\nwep_key0=\""+passphrase+"\"\nwep_tx_keyidx=0}' > conf_file")
 	elif cifrado.startswith("wpa"):
 		passphrase = raw_input("Passphrase:")
 		while len(passphrase)<8:
 			print "Incorrect length (8 or more characters)"
 			passphrase = raw_input("Passphrase:")
-		os.system( "wpa_passphrase "+essid+" "+password+" > " + conf_file)
+		os.system( "wpa_passphrase "+essid+" "+passphrase+" > " + conf_file)
 	else:
 		print "Unknown encryption type"
 	# Connection
-	os.system("wpa_supplicant -Dnl80211 -i "+interfaz+" -c "+conf_file+" &")
+	os.system("wpa_supplicant -Dnl80211 -i"+interfaz+" -c"+conf_file+" &")
 	sys.exit()
-	'''
-	#PEAP+MSCHAPv2
-	os.system("echo 'ctrl_interface=DIR=/var/run/wpa_supplicant \nnetwork={ \nssid=\""+essid+"\"\nscan_ssid=1 \nkey_mgmt=WPA-EAP \neap=PEAP \nidentity=\""+identity+"\"\npassword=\""+password+"\" \nphase1=\"peaplabel=0\" \nphase2=\"auth=MSCHAPV2\" \n}' > "+conf_file)		
-	'''
 
 
 def scan():
@@ -188,13 +190,11 @@ def scan():
 	print str_format.format("ID", "ESSID", "CHANNEL", "CIPHER", "MAC")
 	for red in redes:
 		print str_format.format(red.get("id"), red.get("ssid"), red.get("canal"), red.get("cifrado"), red.get("mac"))
-	menu()
+	print ""
 
 
 def main():
-	#scan()
 	menu()
-
 
 
 if __name__ == "__main__":
