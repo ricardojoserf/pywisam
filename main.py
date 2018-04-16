@@ -6,9 +6,9 @@ import time
 from wifi import Cell, Scheme
 '''
 interfaz = 'wlxc04a00118487'
-interfaz = raw_input('Network interface: ')
-'''
 interfaz = 'wlxe894f609bffc'
+'''
+interfaz = raw_input('Network interface: ')
 #os.system("sudo ifconfig "+interfaz+" down")
 #os.system("sudo iwconfig "+interfaz+" mode managed")
 os.system("sudo ifconfig "+interfaz+" up")
