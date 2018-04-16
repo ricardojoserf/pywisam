@@ -16,20 +16,20 @@ redes = []
 
 
 def menu():
-	opt_ = raw_input('\nOptions: \n1: Scan \n2: Connect\n3: Capture traffic \n4: Crack handshake from pcap\n5: Deauth attack \n6: Create AP\n')
+	opt_ = raw_input('\nOptions: \n1: Scan \n2: Capture traffic (Airodump) \n3: Crack handshake \n4: Deauth attack \n5: Create AP \n6: Connect\n')
 	if   opt_ == "1":
 		scan()
 		menu()
 	elif opt_=="2":
-		connect()
-	elif opt_=="3":
 		capture_traffic()
+	elif opt_=="3":
+		crack_wpa()	
 	elif opt_=="4":
-		crack_wpa()
-	elif opt_=="5":
 		deauth()
-	elif opt_=="6":
+	elif opt_=="5":
 		create_ap()
+	elif opt_=="6":
+		connect()	
 	else:
 		print "Unknown option"
 
