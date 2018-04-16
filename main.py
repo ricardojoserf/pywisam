@@ -164,7 +164,12 @@ def scan():
 	list_ = []
 	redes = []
 	print "\nScanning...\n"
+	sec_counter = 0
 	while len(list_) == 0:
+		sec_counter+=1
+		time.sleep(0.5)
+		if sec_counter==60:
+			break
 		list_ = Cell.all(interfaz)
 	count = 0
 	for i in list_:
@@ -179,10 +184,10 @@ def scan():
 			cifrado = "None"
 		redes.append( { "id":str(count), "ssid": str(ssid), "cifrado": str(cifrado), "mac": str(mac), "frecuencia": str(frecuencia), "canal": str(canal), "rate": str(max_rate) } )
 		count+=1
+	str_format = ' {0:4} {1:25} {2:8}  {3:6}    {4:17}'
+	print str_format.format("ID", "ESSID", "CHANNEL", "CIPHER", "MAC")
 	for red in redes:
-		print "- ", red.get("ssid"),"(ID = ",red.get("id"),")"
-		print "   MAC:"+red.get("mac")+"	Cypher:"+red.get("cifrado")+"\n   Canal:"+red.get("canal")+"("+red.get("frecuencia")+")		Rate:"+red.get("rate")
-		print "---------------------------------------------------------"
+		print str_format.format(red.get("id"), red.get("ssid"), red.get("canal"), red.get("cifrado"), red.get("mac"))
 	menu()
 
 
