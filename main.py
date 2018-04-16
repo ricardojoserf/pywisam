@@ -8,7 +8,7 @@ from wifi import Cell, Scheme
 interfaz = 'wlxc04a00118487'
 interfaz = raw_input('Network interface: ')
 '''
-interfaz = 'ra0'
+interfaz = 'wlxe894f609bffc'
 #os.system("sudo ifconfig "+interfaz+" down")
 #os.system("sudo iwconfig "+interfaz+" mode managed")
 os.system("sudo ifconfig "+interfaz+" up")
@@ -142,22 +142,22 @@ def connect():
 	cifrado = red.get("cifrado").lower()
 	if cifrado == "none":
 		os.system("echo 'network={\nssid=\""+essid+"\"\nkey_mgmt=NONE\npriority=100\n}' > conf_file")
+		os.system("sudo wpa_supplicant -Dnl80211 -i"+interfaz+" -c"+conf_file+" ")
 	elif cifrado == "wep":
 		passphrase = raw_input("Passphrase:")
 		while ( len(passphrase)!=5 and len(passphrase)!=13 and len(passphrase)!=16 and len(passphrase)!=29):
 			print "Incorrect length (5,13,16 or 29 characters)"
 			passphrase = raw_input("Passphrase:")
 		os.system("echo 'network={\nssid=\""+essid+"\"\nkey_mgmt=NONE\nwep_key0=\""+passphrase+"\"\nwep_tx_keyidx=0}' > conf_file")
+		os.system("sudo wpa_supplicant -Dnl80211 -i"+interfaz+" -c"+conf_file+" ")
 	elif cifrado.startswith("wpa"):
 		passphrase = raw_input("Passphrase:")
 		while len(passphrase)<8:
 			print "Incorrect length (8 or more characters)"
 			passphrase = raw_input("Passphrase:")
-		os.system( "wpa_passphrase "+essid+" "+passphrase+" > " + conf_file)
+		os.system("nmcli dev wifi connect "+essid+" password "+passphrase)
 	else:
 		print "Unknown encryption type"
-	# Connection
-	os.system("wpa_supplicant -Dnl80211 -i"+interfaz+" -c"+conf_file+" &")
 	sys.exit()
 
 
