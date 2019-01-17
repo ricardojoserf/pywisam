@@ -20,15 +20,29 @@ A Wifi pentesting framework written in Python
 - *Option 7*: Get hidden ESSID - Attack a Wifi with the ESSID hidden to get the network name
 
 
-## Requirements
-
-*pip install -r requirements.txt*
-
-*apt-get install hostapd*
-
-
-# Screenshot
+# Example
 
 ![Screenshot](images/Screenshot_1.png)
 
 
+## Requirements
+
+```
+apt-get install hostapd
+```
+
+Python 2.x:
+
+```
+pip install -r install/requirements.txt
+```
+
+Python 3.x:
+
+```
+pip3 install -r install/requirements.txt
+```
+
+## Note
+
+Tested both in Python2.x (2.7.15rc1) and Python 3.x (3.6.7)

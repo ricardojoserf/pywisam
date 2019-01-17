@@ -1,1 +1,1 @@
-default_interface='wlx002522509005'
+default_interface=''
