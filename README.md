@@ -22,7 +22,7 @@ A Wifi pentesting framework written in Python
 
 # Example
 
-![Screenshot](images/Screenshot_1.png)
+![Screenshot](https://i.imgur.com/OlTzpbl.png)
 
 
 ## Requirements
